@@ -1,0 +1,19 @@
+{
+  "name": "grain-rot-calc",
+  "version": "1.0.0",
+  "description": "Grain Rot Calculator - An Interview Task Edit",
+  "main": "parse.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpts/grain-rot-calc.git"
+  },
+  "author": "James Prance",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jpts/grain-rot-calc/issues"
+  },
+  "homepage": "https://github.com/jpts/grain-rot-calc#readme"
+}
