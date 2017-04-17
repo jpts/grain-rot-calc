@@ -45,12 +45,9 @@ function csvToObj(str,cb) {
   var set = []
   csv().fromString(str)
   .on('json',(jsonObj, rowIndex)=>{ // called on each row
-      //console.log(jsonObj);
       set.push(jsonObj);
   })
   .on('done',()=>{ // called when done
-      //console.log('Finished Parsing:');
-      //console.log(set);
       this.set = set;
       cb();
   })
@@ -83,8 +80,8 @@ function getMedian(arr) {
  * and calculate standard deviation
  */
 function calcStdDeviationTemp() {
-  var stdDev = stdDeviation(_.map(this.set,function(x){ return x['Temperature']; }));
-  console.log(stdDev);
+  var stdDev = stdDeviation( _.map(this.set,function(x){ return x['Temperature']; }) );
+  console.log('sd:'+stdDev);
 }
 
 /*
@@ -92,6 +89,14 @@ function calcStdDeviationTemp() {
  * https://gist.github.com/venning/b6593f965773985f923f
  */
 function stdDeviation(arr){
-  var avg = _.sum(arr)/arr.length;
-  return math.sqrt(_.sum(_.map(arr, (i) => math.pow((i - avg), 2))) / arr.length);
+  return Math.sqrt( getVariance(arr) );
+}
+
+function getVariance(arr){
+  var avg = mean(arr);
+  return _(arr).map( function(x) { return Math.pow(x-avg,2); } ).mean();
+}
+
+function mean(arr){
+  return _.sum(arr.map(Number))/_.size(arr);
 }
