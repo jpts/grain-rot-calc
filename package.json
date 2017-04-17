@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/jpts/grain-rot-calc/issues"
   },
-  "homepage": "https://github.com/jpts/grain-rot-calc#readme"
+  "homepage": "https://github.com/jpts/grain-rot-calc#readme",
+  "dependencies": {
+    "csvtojson": "^1.1.4",
+    "jsonfile": "^2.4.0",
+    "lodash": "^4.17.4",
+    "request": "^2.81.0"
+  }
 }
