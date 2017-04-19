@@ -9,6 +9,8 @@ const fs = require('fs');
 const request = require('request');
 const ndjson = require('ndjson');
 
+// These were estimated by looking at the three sample
+// dat sets and looking when CO2 > 0.04
 const tempThreshold = 30;
 const humidityThreshold = 65;
 
