@@ -12,31 +12,47 @@ const ndjson = require('ndjson');
 const tempThreshold = 30;
 const humidityThreshold = 65;
 
+/*
+ * Main function which reads from the urlFile
+ * and calls all processing functions
+ */
 jsonfile.readFile(urlFile, 'utf8', function (err,obj) {
+  // Check th file opened correctly
   if (err) {
     return console.log(err);
   }
+  // Open output file
   prepNDJSON();
+
+  // Setup counter so we can detect the last iteration of the loop
+  var inputSize = obj.inputFiles.length;
+
+  // Iterate over each url element of the json array in the input file
   _.each(obj.inputFiles,function(jsonurl,index){
+    // Download the content of each url
     downloadCsv(jsonurl, function(response){
+      // Convert content to a js object
       csvToObj(response,function(){
+        // perform calculations on the retrieved data
         var med = calcMedianTemp();
         var sd = calcStdDeviationTemp();
         var rot = getRottingTime();
+        // format this data into an object and append to output file
         var jsonline = {"grainPile": index+1, "standardDeviation":sd, "median":med, "rotsAtTime":rot};
         appendToNDJSON(jsonline);
+        // close file if we are in the last loop
+        if (--inputSize === 0) closeNDJSON();
       });
     });
   });
-
 });
 
 /*
  * Function to download CSV from url,
- * Returns body of request
+ * Returns body of request as cb parameter
  */
 function downloadCsv(url,cb) {
-  console.log('Downloading ',url);
+  console.log('Downloading',url);
   request(url,function(error, response, body) {
     if (response.statusCode != 200) {
       console.log('Error:',error);
@@ -73,7 +89,7 @@ function calcMedianTemp() {
 
 /*
  * Calculate median from array
- * https://github.com/Delapouite/lodash.math/blob/master/lodash.math.js
+ * https://github.com/Delapouite/lodash.math/blob/master/lodash.math.js#L15
  */
 function getMedian(arr) {
   arr = arr.slice(0);
@@ -111,21 +127,24 @@ function mean(arr){
 
 /*
  * Function to find when the grain will rot
- * The arrays are compared to threshold values set above
+ * The array values are compared to threshold values set above
+ * Temperature and Humidity are thresholded seperately and then the min is taken
+ * NB: The first row is taken as day 0
  */
 function getRottingTime(){
   var daysUntilHumidRot = _.findIndex(_.map(this.set, function(x){ return x['Humidity']; }), function(y) {return y >= humidityThreshold;});
   var daysUntilTempRot = _.findIndex(_.map(this.set, function(x){ return x['Temperature']; }), function(y) {return y >= tempThreshold;});
-  var days = (daysUntilHumidRot > daysUntilTempRot) ? daysUntilTempRot : daysUntilHumidRot;
+  var days = Math.min(daysUntilHumidRot, daysUntilTempRot);
   console.log('daysToRot:'+days);
   return days;
 }
 
 /*
  * Function which sets up the NDJSON library
- * with a stream we can use for writing
+ * with a stream that we can use for writing
  */
 function prepNDJSON(){
+  fs.writeFile(outFile,'');
   this.serialize = ndjson.serialize();
   this.serialize.on('data', function(line) {
     fs.appendFile(outFile, line, function (err) {
@@ -141,5 +160,13 @@ function prepNDJSON(){
  * for writing the output json file
  */
 function appendToNDJSON(json){
-  this.serialize.write(json)
+  this.serialize.write(json);
+}
+
+/*
+ * Function to close json file properly
+ */
+function closeNDJSON(){
+  this.serialize.end();
+  console.log('File written:'+outFile);
 }
