@@ -34,11 +34,11 @@ jsonfile.readFile(urlFile, 'utf8', function (err,obj) {
     // Download the content of each url
     downloadCsv(jsonurl, function(response){
       // Convert content to a js object
-      csvToObj(response,function(){
+      csvToObj(response,function(obj){
         // perform calculations on the retrieved data
-        var med = calcMedianTemp();
-        var sd = calcStdDeviationTemp();
-        var rot = getRottingTime();
+        var med = calcMedianTemp(obj);
+        var sd = calcStdDeviationTemp(obj);
+        var rot = getRottingTime(obj);
         // format this data into an object and append to output file
         var jsonline = {"grainPile": index+1, "standardDeviation":sd, "median":med, "rotsAtTime":rot};
         appendToNDJSON(jsonline);
@@ -74,8 +74,7 @@ function csvToObj(str,cb) {
       set.push(jsonObj);
   })
   .on('done',()=>{ // called when done
-      this.set = set;
-      cb();
+      cb(set);
   })
 }
 
@@ -83,8 +82,8 @@ function csvToObj(str,cb) {
  * Function to map temperature data to array
  * and calculate median
  */
-function calcMedianTemp() {
-  var median = getMedian( _.map(this.set, function(x){ return x['Temperature']; }) );
+function calcMedianTemp(obj) {
+  var median = getMedian( _.map(obj, function(x){ return x['Temperature']; }) );
   console.log('median:'+median);
   return median;
 }
@@ -104,8 +103,8 @@ function getMedian(arr) {
  * Function to map temperature data to array
  * and calculate standard deviation
  */
-function calcStdDeviationTemp() {
-  var stdDev = stdDeviation( _.map(this.set,function(x){ return x['Temperature']; }) );
+function calcStdDeviationTemp(obj) {
+  var stdDev = stdDeviation( _.map(obj,function(x){ return x['Temperature']; }) );
   console.log('stddev:'+stdDev);
   return stdDev;
 }
@@ -133,9 +132,9 @@ function mean(arr){
  * Temperature and Humidity are thresholded seperately and then the min is taken
  * NB: The first row is taken as day 0
  */
-function getRottingTime(){
-  var daysUntilHumidRot = _.findIndex(_.map(this.set, function(x){ return x['Humidity']; }), function(y) {return y >= humidityThreshold;});
-  var daysUntilTempRot = _.findIndex(_.map(this.set, function(x){ return x['Temperature']; }), function(y) {return y >= tempThreshold;});
+function getRottingTime(obj){
+  var daysUntilHumidRot = _.findIndex(_.map(obj, function(x){ return x['Humidity']; }), function(y) {return y >= humidityThreshold;});
+  var daysUntilTempRot = _.findIndex(_.map(obj, function(x){ return x['Temperature']; }), function(y) {return y >= tempThreshold;});
   var days = Math.min(daysUntilHumidRot, daysUntilTempRot);
   console.log('daysToRot:'+days);
   return days;
