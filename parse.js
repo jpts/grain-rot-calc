@@ -4,7 +4,6 @@ const outFile = 'output.json'
 const jsonfile = require('jsonfile');
 const csv = require('csvtojson');
 const _ = require('lodash');
-const math = require('mathjs');
 const fs = require('fs');
 const request = require('request');
 const ndjson = require('ndjson');
@@ -95,7 +94,7 @@ function calcMedianTemp(obj) {
 function getMedian(arr) {
   arr = arr.slice(0);
   var middle = (arr.length + 1) / 2;
-  var sorted = math.sort(arr);
+  var sorted = _.sortBy(arr);
   return (sorted.length % 2) ? sorted[middle - 1] : (sorted[middle - 1.5] + sorted[middle - 0.5]) / 2;
 }
 

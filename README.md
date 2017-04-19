@@ -7,7 +7,6 @@ A NodeJS utility to parse CSV files from remote servers (listed in urls.json), d
  * csvtojson
  * jsonfile
  * lodash
- * mathjs
  * ndjson
  * request
 
